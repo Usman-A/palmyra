@@ -5,55 +5,35 @@ var defaultConfigFiles = [];
 function populateConfigFileSelectorHelper(files) {
   let option;
   let selectList = document.getElementById("configFileSelector");
-  let lastOption = selectList.lastElementChild;
-  // pop last child element of selectList
-  selectList.removeChild(lastOption);
-  for (let file of files) {
-    option = document.createElement("option");
-    option.text = file.name;
-    selectList.appendChild(option);
+  // Clear existing options
+  while (selectList.firstChild) {
+    selectList.removeChild(selectList.firstChild);
   }
-  selectList.appendChild(lastOption);
+  
+  // Add only the conllu_config option
+  option = document.createElement("option");
+  option.text = "conllu_config.cfg";
+  selectList.appendChild(option);
+  
   // set the default value to the first option
   selectList.selectedIndex = 0;
 }
 
-// retrieve the config files from github using the github api
-function retrieveConfigFiles() {
-  return new Promise((resolve, reject) => {
-    let fileObjects = [];
-    let rsp;
-    axios
-      .get(
-        "https://api.github.com/repos/CAMeL-Lab/palmyra/contents/palmyraSampleFiles/config"
-      )
-      .then(async (rsp) => {
-        let files = rsp.data;
-        for (let file of files) {
-          rsp = await axios.get(file.download_url);
-          let fileObject = new File([JSON.stringify(rsp.data)], file.name, { type: "text/plain" });
-          fileObjects.push(fileObject);
-        }
-        resolve(fileObjects);
-      })
-      .catch((err) => {
-        reject(err);
-      });
-  });
-}
-
-// populate the selector with the default config files retrieved from github
+// populate the selector with only the conllu_config.cfg file
 function populateConfigFileSelector() {
   let selectList = document.getElementById("configFileSelector");
-  selectList.onchange = () => { // set the onchange event handler for the selector
-    if (selectList.selectedIndex == selectList.options.length - 1) // user upload their own file option
-      document.getElementById("configFile").style.display = "block"; // display the file input
-    else document.getElementById("configFile").style.display = "none"; // hide the file input
-  };
-  retrieveConfigFiles()
-    .then((files) => {
-      defaultConfigFiles = files;
-      populateConfigFileSelectorHelper(files);
+  // Hide file input since we're using fixed config
+  document.getElementById("configFile").style.display = "none";
+  
+  // Create a File object from the conllu_config.cfg content
+  fetch('palmyra/conllu_config.cfg')
+    .then(response => response.text())
+    .then(data => {
+      let fileObject = new File([data], "conllu_config.cfg", { type: "text/plain" });
+      defaultConfigFiles = [fileObject];
+      populateConfigFileSelectorHelper([fileObject]);
+      // Auto-load the config file
+      readConfigFile();
     })
     .catch((err) => {
       console.log(err);
@@ -275,33 +255,13 @@ function loadFile(file) {
 
 //Read the config file
 var readConfigFile = async function () {
-  var selectList = document.getElementById("configFileSelector");
-  var file;
-  // default config file
-  if (
-    selectList.selectedIndex > 0 &&
-    selectList.selectedIndex < selectList.options.length - 1
-  ) {
-    file = defaultConfigFiles[selectList.selectedIndex - 1];
-  } else if (selectList.selectedIndex == selectList.options.length - 1) {
-    // user uploaded config file
-    var x = document.getElementById("configFile");
-    var input = "";
-    if ("files" in x) {
-      if (x.files.length == 0) {
-        var morphoLabel = document.getElementById("labelspMorphoFeats");
-        morphoLabel.style.visibility = "hidden";
-        txt = "Select config file.";
-        return;
-      } else {
-        file = x.files[0];
-      }
+  // Always use the first file in defaultConfigFiles (conllu_config.cfg)
+  if (defaultConfigFiles.length > 0) {
+    let file = defaultConfigFiles[0];
+    if (!alreadyReadConfigFiles.includes(file)) {
+      alreadyReadConfigFiles.push(file);
+      await loadFile(file);
     }
-  } else return; // no config file selected
-
-  if (!alreadyReadConfigFiles.includes(file)) {
-    alreadyReadConfigFiles.push(file);
-    await loadFile(file);
   }
   return;
 };
