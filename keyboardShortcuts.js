@@ -12,10 +12,7 @@ function listingKeyboardShortcut(event) {
 
 function fileMenuKeyboardShortcuts(event) {
   // file menu shortcuts
-  if (event.ctrlKey && event.shiftKey && event.code === 'KeyS') {saveTreeRemote();}
-  else if (event.ctrlKey && event.shiftKey && event.code === 'KeyR') {renameToggle();}
-  else if (event.ctrlKey && event.shiftKey && event.code === 'KeyD') {downloadToggle();}
-  else if (event.ctrlKey && event.shiftKey && event.code === 'KeyM') {editToggle();}
+  if (event.ctrlKey && event.shiftKey && event.code === 'KeyM') {editToggle();}
   else if (event.ctrlKey && event.shiftKey && event.code === 'KeyT') {tagsToggle()}
 }
 
