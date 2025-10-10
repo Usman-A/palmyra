@@ -369,7 +369,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.)
         // Auto-load fixed config filew
         window.addEventListener('load', function() {
             // Load the fixed config file
-            fetch('palmyra/conllu_config.cfg')
+            fetch('conllu_config.cfg')
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Failed to load config file');

@@ -25,19 +25,10 @@ function populateConfigFileSelector() {
   // Hide file input since we're using fixed config
   document.getElementById("configFile").style.display = "none";
   
-  // Create a File object from the conllu_config.cfg content
-  fetch('palmyra/conllu_config.cfg')
-    .then(response => response.text())
-    .then(data => {
-      let fileObject = new File([data], "conllu_config.cfg", { type: "text/plain" });
-      defaultConfigFiles = [fileObject];
-      populateConfigFileSelectorHelper([fileObject]);
-      // Auto-load the config file
-      readConfigFile();
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+  // Since config is now loaded in viewtree.html, just set up the selector
+  let fileObject = new File([''], "conllu_config.cfg", { type: "text/plain" });
+  defaultConfigFiles = [fileObject];
+  populateConfigFileSelectorHelper([fileObject]);
 }
 
 function createButton(buttonText, editPOSByButton) {
@@ -67,6 +58,8 @@ var parseConfig = function (content) {
   else editLemma = false;
 
   var posContainer = document.getElementById("postags");
+  // Clear existing POS tags to prevent duplicates
+  posContainer.innerHTML = '<label class="labelsp">POS Tags</label>';
   var divs = {};
 
   for (let i = 0; i < configs.pos.values.length; i++) {
@@ -88,6 +81,8 @@ var parseConfig = function (content) {
   }
 
   var labelContainer = document.getElementById("labels");
+  // Clear existing relation labels to prevent duplicates
+  labelContainer.innerHTML = '<label class="labelsp">Relation Labels</label>';
   var divs = {};
 
   for (var i = 0; i < configs.relation.values.length; i++) {
